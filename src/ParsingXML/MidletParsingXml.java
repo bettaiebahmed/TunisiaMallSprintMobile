@@ -1,0 +1,121 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package ParsingXML;
+import Handler.*;
+import entity.Boutique;
+import java.io.DataInputStream;
+import javax.microedition.io.Connector;
+import javax.microedition.io.HttpConnection;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.List;
+import javax.microedition.midlet.*;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+/**
+ * @author Houssem Eddine
+ */
+public class MidletParsingXml extends MIDlet implements CommandListener, Runnable {
+
+    Display disp = Display.getDisplay(this);
+    Command cmdParse = new Command("Personnes", Command.SCREEN, 0);
+    Command cmdBack = new Command("Back", Command.BACK, 0);
+    Boutique[] Boutiques;
+    List lst = new List("Personnes", List.IMPLICIT);
+    Form f = new Form("Accueil");
+    Form form = new Form("Infos Personne");
+    Form loadingDialog = new Form("Please Wait");
+    StringBuffer sb = new StringBuffer();
+
+    public void startApp() {
+        f.append("Click PERSONNES to get your personnes_list");
+        f.addCommand(cmdParse);
+        f.setCommandListener(this);
+        lst.setCommandListener(this);
+        form.addCommand(cmdBack);
+        form.setCommandListener(this);
+        disp.setCurrent(f);
+    }
+
+    public void pauseApp() {
+    }
+
+    public void destroyApp(boolean unconditional) {
+    }
+
+    public void commandAction(Command c, Displayable d) {
+
+        if (c == cmdParse) {
+            disp.setCurrent(loadingDialog);
+            Thread th = new Thread(this);
+            th.start();
+        }
+
+        if (c == List.SELECT_COMMAND) {
+            form.append("Informations Personne: \n");
+            form.append(showPersonne(lst.getSelectedIndex()));
+            disp.setCurrent(form);
+        }
+
+        if (c == cmdBack) {
+            form.deleteAll();
+            disp.setCurrent(lst);
+        }
+
+    }
+
+    public void run() {
+        try {
+            // this will handle our XML
+            BoutiqueHandler BoutiqueHandler = new BoutiqueHandler();
+            // get a parser object
+            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            // get an InputStream from somewhere (could be HttpConnection, for example)
+            HttpConnection hc = (HttpConnection) Connector.open("http://localhost/parsing/getXmlboutiqueAttributes.php");
+            DataInputStream dis = new DataInputStream(hc.openDataInputStream());
+            parser.parse(dis, BoutiqueHandler);
+            // display the result
+            Boutiques = BoutiqueHandler.getBoutique();
+
+            if (Boutiques.length > 0) {
+                for (int i = 0; i < Boutiques.length; i++) {
+                    lst.append(Boutiques[i].getLibelle()+" "
+                            +Boutiques[i].getMail(), null);
+
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Exception:" + e.toString());
+        }
+        disp.setCurrent(lst);
+    }
+
+    private String showPersonne(int i) {
+        String res = "";
+        if (Boutiques.length > 0) {
+            sb.append("* ");
+            sb.append(Boutiques[i].getId());
+            sb.append("\n");
+            sb.append("* ");
+            sb.append(Boutiques[i].getLibelle());
+            sb.append("\n");
+            sb.append("* ");
+            sb.append(Boutiques[i].getMail());
+            sb.append("\n");
+        }
+        res = sb.toString();
+        sb = new StringBuffer("");
+        return res;
+        
+        
+    }
+}
