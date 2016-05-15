@@ -1,0 +1,11 @@
+MIDlet-1: Midlet, , sprint_j2m.Midlet
+MIDlet-2: sms, , sprint_j2m.sms
+MIDlet-3: Midlet_Ajout_Produit, , sprint_j2m.Midlet_Ajout_Produit
+MIDlet-4: Midlet_reclamation, , sprint_j2m.Midlet_reclamation
+MIDlet-Jar-Size: 9934
+MIDlet-Jar-URL: Sprint_J2m.jar
+MIDlet-Name: Sprint_J2m
+MIDlet-Vendor: Vendor
+MIDlet-Version: 1.0
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.1
